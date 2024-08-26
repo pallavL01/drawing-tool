@@ -7,7 +7,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100lvh;
+    height: 100vh;
 }
 
 /* Main Container using Flexbox Layout */
@@ -26,7 +26,9 @@ body {
     padding: 10px;
 }
 
-#toolbar button {
+#toolbar button,
+#toolbar input[type="file"],
+#toolbar .styled-dropdown {
     background-color: #007bff;
     color: white;
     border: none;
@@ -37,12 +39,32 @@ body {
     transition: background-color 0.3s ease;
 }
 
-#toolbar button:hover {
+#toolbar button:hover,
+#toolbar input[type="file"]:hover,
+#toolbar .styled-dropdown:hover {
     background-color: #0056b3;
 }
 
-#toolbar button:active {
+#toolbar button:active,
+#toolbar input[type="file"]:active,
+#toolbar .styled-dropdown:active {
     background-color: #003f7f;
+}
+
+#toolbar .styled-dropdown {
+    appearance: none;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#toolbar .styled-dropdown:focus {
+    outline: none;
+    box-shadow: 0px 0px 5px rgba(0, 0, 255, 0.5);
 }
 
 /* Canvas Container */
@@ -71,7 +93,9 @@ canvas {
         justify-content: space-around;
     }
 
-    #toolbar button {
+    #toolbar button,
+    #toolbar input[type="file"],
+    #toolbar .styled-dropdown {
         margin-bottom: 10px;
         width: 100%;
         box-sizing: border-box;

@@ -16,6 +16,14 @@
             <button id="rectangleToolButton">Rectangle</button>
             <button id="circleToolButton">Circle</button>
             <button id="textToolButton">Text</button>
+            <input type="file" id="imageUpload" accept="image/*">
+            <select id="filterDropdown" class="styled-dropdown">
+                <option value="" selected disabled>Apply Filter</option>
+                <option value="reset">Reset Filter</option>
+                <option value="blur">Blur</option>
+                <option value="invert">Invert</option>
+                <option value="grayscale">Grayscale</option>
+            </select>
         </div>
         <div id="canvasContainer">
             <canvas id="drawingCanvas" width="800" height="600"></canvas>

@@ -1,8 +1,11 @@
 import { initializeToolbar } from "./components/toolbar.js";
 import { initializeShapeTools } from "./components/shapeTools.js";
-import { initializeTextTool } from "./components/textTool.js"; // Import the text tool
+import { initializeTextTool } from "./components/textTool.js";
+import { CanvasWorkerFramework } from "./canvasWorkerFramework.js"; // Import your worker framework
 
 let currentTool = "brush"; // Default tool
+let uploadedImage = null; // Store uploaded image
+let originalImageData = null; // Store the original image data for reset
 
 const canvas = document.getElementById("drawingCanvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
@@ -13,6 +16,9 @@ let currentFreeform = null; // To hold the current freeform drawing
 let draggingShape = null;
 let offsetX = 0;
 let offsetY = 0;
+
+// Initialize your worker framework
+const workerFramework = new CanvasWorkerFramework("worker.js", 4);
 
 function setCurrentTool(tool) {
   currentTool = tool;
@@ -78,6 +84,13 @@ function stopDrawing() {
 
 function redrawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw uploaded image first if available
+  if (uploadedImage) {
+    ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+  }
+
+  // Draw shapes and freeform drawings on top
   shapes.forEach((shape) => {
     if (shape.type === "rectangle") {
       ctx.fillStyle = shape.color;
@@ -185,3 +198,51 @@ canvas.addEventListener("mouseout", onMouseUp);
 initializeToolbar(setCurrentTool); // Pass setCurrentTool to toolbar.js
 initializeShapeTools(setCurrentTool); // Pass setCurrentTool to shapeTools.js
 initializeTextTool(setCurrentTool); // Initialize the text tool
+
+// Offload filters to the worker
+function applyFilter(filterName) {
+  if (filterName === "reset") {
+    if (originalImageData) {
+      ctx.putImageData(originalImageData, 0, 0); // Restore the original image data
+    }
+  } else {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    workerFramework
+      .processCanvasTask(imageData, "applyFilter", { filter: filterName })
+      .then((filteredData) => {
+        ctx.putImageData(filteredData, 0, 0);
+      })
+      .catch((error) => {
+        console.error("Error applying filter:", error);
+      });
+  }
+}
+
+// Add event listener for filter dropdown
+document
+  .getElementById("filterDropdown")
+  .addEventListener("change", (event) => {
+    const filterName = event.target.value;
+    if (filterName) {
+      applyFilter(filterName);
+    }
+  });
+
+// Handle image upload
+document.getElementById("imageUpload").addEventListener("change", (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const img = new Image();
+      img.onload = function () {
+        uploadedImage = img;
+        ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+        originalImageData = ctx.getImageData(0, 0, canvas.width, canvas.height); // Save original image data
+        redrawCanvas(); // Draw the uploaded image on the canvas
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
