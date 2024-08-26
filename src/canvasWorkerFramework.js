@@ -1,5 +1,3 @@
-// canvasWorkerFramework.js
-
 export class CanvasWorkerFramework {
   constructor(workerScriptUrl, poolSize = 4) {
     this.workerPool = new Map();
@@ -14,25 +12,37 @@ export class CanvasWorkerFramework {
   }
 
   createWorker(workerScriptUrl, workerId) {
-    const worker = new Worker(new URL(workerScriptUrl, import.meta.url), {
-      type: "module",
-    });
-    worker.onmessage = this.handleWorkerResponse.bind(this, workerId);
-    worker.onerror = this.handleWorkerError.bind(this, workerId);
-    this.workerPool.set(workerId, worker);
+    try {
+      const worker = new Worker(new URL(workerScriptUrl, import.meta.url), {
+        type: "module",
+      });
+      worker.onmessage = this.handleWorkerResponse.bind(this, workerId);
+      worker.onerror = this.handleWorkerError.bind(this, workerId);
+      this.workerPool.set(workerId, worker);
+      console.log(`Worker ${workerId} created successfully.`);
+    } catch (error) {
+      console.error(`Failed to create worker ${workerId}:`, error);
+    }
   }
 
   handleWorkerResponse(workerId, event) {
-    const { imageData } = event.data;
+    const { imageData, result } = event.data;
     const [resolve] = this.taskQueue.shift();
-    resolve(imageData);
+
+    if (imageData) {
+      resolve(imageData);
+    } else if (result) {
+      resolve(result);
+    } else {
+      console.error(`Worker ${workerId} returned unknown data type.`);
+    }
 
     this.activeWorkers.delete(workerId);
     this.processNextTask(workerId);
   }
 
   handleWorkerError(workerId, error) {
-    console.error("Worker Error:", error);
+    console.error(`Worker ${workerId} Error:`, error);
     this.terminateWorker(workerId);
 
     if (this.taskQueue.length > 0) {
@@ -69,10 +79,11 @@ export class CanvasWorkerFramework {
   }
 
   terminateWorker(workerId) {
-    if (this.workerPool.has(workerId)) {
-      const worker = this.workerPool.get(workerId);
+    const worker = this.workerPool.get(workerId);
+    if (worker) {
       worker.terminate();
       this.workerPool.delete(workerId);
+      console.log(`Worker ${workerId} terminated.`);
     }
   }
 }

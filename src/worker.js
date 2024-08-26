@@ -1,17 +1,88 @@
-// worker.js
+// Import and initialize the Wasm modules
+import initFilters, {
+  apply_gaussian_blur,
+} from "./wasm-filters/wasm_filters.js";
+import initPhysics, { World } from "./wasm-physics/wasm_physics.js";
 
-self.onmessage = function (event) {
-  const { task, imageData, options } = event.data;
+let wasmFiltersInitialized = false;
+let wasmPhysicsInitialized = false;
+let world = null;
+
+// Initialize the WebAssembly modules
+async function loadWasm() {
+  try {
+    // Initialize the filters module
+    const wasmFiltersPath = new URL(
+      "./wasm-filters/wasm_filters_bg.wasm",
+      import.meta.url
+    );
+    await initFilters({ path: wasmFiltersPath.href }); // Pass the path as part of an object
+    wasmFiltersInitialized = true;
+    console.log("WASM Filters module initialized successfully");
+
+    // Initialize the physics module
+    const wasmPhysicsPath = new URL(
+      "./wasm-physics/wasm_physics_bg.wasm",
+      import.meta.url
+    );
+    await initPhysics({ path: wasmPhysicsPath.href }); // Pass the path as part of an object
+    wasmPhysicsInitialized = true;
+    console.log("WASM Physics module initialized successfully");
+  } catch (error) {
+    console.error("Error initializing WASM modules:", error);
+  }
+}
+
+loadWasm();
+
+self.onmessage = async function (event) {
+  const { task, imageData, options, payload } = event.data;
+
+  if (!wasmFiltersInitialized || !wasmPhysicsInitialized) {
+    await loadWasm();
+  }
 
   switch (task) {
     case "applyFilter":
-      const filteredData = applyFilter(imageData, options.filter);
-      self.postMessage({ imageData: filteredData });
+      if (options?.filter === "blur-wasm") {
+        const filteredData = applyGaussianBlurWasm(imageData);
+        self.postMessage({ task: "applyFilter", imageData: filteredData });
+      } else {
+        const filteredData = applyFilter(imageData, options.filter);
+        self.postMessage({ task: "applyFilter", imageData: filteredData });
+      }
       break;
-    // Add other cases for different tasks
+
+    case "initPhysicsWorld":
+      if (payload) {
+        initializePhysicsWorld(payload.gravity, payload.timeStep);
+      } else {
+        console.error("initPhysicsWorld task received without a valid payload");
+      }
+      break;
+
+    case "addParticles":
+      if (payload) {
+        addParticles(
+          payload.numberOfParticles,
+          payload.canvasWidth,
+          payload.canvasHeight
+        );
+      } else {
+        console.error("addParticles task received without a valid payload");
+      }
+      break;
+
+    case "updateSimulation":
+      updatePhysicsSimulation();
+      break;
+
+    default:
+      console.error("Unknown task:", task);
   }
 };
 
+// Image Processing Functions
 function applyFilter(imageData, filter) {
   switch (filter) {
     case "blur":
@@ -57,4 +128,39 @@ function grayscaleFilter(imageData) {
     data[i + 2] = avg; // Blue
   }
   return imageData;
+}
+
+function applyGaussianBlurWasm(imageData) {
+  const width = imageData.width;
+  const height = imageData.height;
+  apply_gaussian_blur(new Uint8Array(imageData.data.buffer), width, height);
+  return imageData;
+}
+
+// Physics Simulation Functions
+function initializePhysicsWorld(gravity, timeStep) {
+  if (world === null) {
+    world = new World(gravity, timeStep);
+  }
+}
+
+function addParticles(numberOfParticles, canvasWidth, canvasHeight) {
+  if (world !== null) {
+    for (let i = 0; i < numberOfParticles; i++) {
+      const x = Math.random() * canvasWidth;
+      const y = Math.random() * canvasHeight;
+      const vx = (Math.random() - 0.5) * 2;
+      const vy = (Math.random() - 0.5) * 2;
+      const mass = Math.random() * 2 + 0.5;
+      world.add_particle(x, y, vx, vy, mass);
+    }
+  }
+}
+
+function updatePhysicsSimulation() {
+  if (world !== null) {
+    world.update();
+    const positions = world.get_particle_positions();
+    self.postMessage({ task: "updateCanvas", positions });
+  }
 }

@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Drawing App</title>
-    <link rel="stylesheet" href="./src/style.css">
+    <title>Canvas Drawing and Physics Simulation App</title>
+    <link rel="stylesheet" href="/src/style.css">
 </head>
 
 <body>
@@ -16,23 +16,26 @@
             <button id="rectangleToolButton">Rectangle</button>
             <button id="circleToolButton">Circle</button>
             <button id="textToolButton">Text</button>
+            <input type="color" id="colorPickerInput" value="#000000"> <!-- Color Picker -->
             <input type="file" id="imageUpload" accept="image/*">
             <select id="filterDropdown" class="styled-dropdown">
                 <option value="" selected disabled>Apply Filter</option>
                 <option value="reset">Reset Filter</option>
-                <option value="blur">Blur</option>
+                <option value="blur-wasm">Gaussian Blur (WASM)</option> <!-- WASM-based blur -->
+                <option value="blur">Gaussian Blur (JS)</option> <!-- JS-based blur (if implemented) -->
                 <option value="invert">Invert</option>
                 <option value="grayscale">Grayscale</option>
             </select>
             <button id="clearCanvasButton">Clear Canvas</button>
+            <button id="startSimulationButton">Start Simulation</button>
+            <button id="resetSimulationButton">Reset Simulation</button>
         </div>
         <div id="canvasContainer">
             <canvas id="drawingCanvas" width="800" height="600"></canvas>
         </div>
-        <input type="color" id="colorPickerInput" value="#000000"> <!-- Color Picker -->
     </div>
 
-    <script type="module" src="./src/app.js"></script>
+    <script type="module" src="/src/app.js"></script>
 </body>
 
 </html>
