@@ -8,7 +8,8 @@ const canvas = document.getElementById("drawingCanvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
 let isDrawing = false;
-let shapes = []; // Array to hold shapes
+let shapes = []; // Array to hold shapes and freeform drawings
+let currentFreeform = null; // To hold the current freeform drawing
 let draggingShape = null;
 let offsetX = 0;
 let offsetY = 0;
@@ -34,6 +35,14 @@ function startDrawing(event) {
       color: currentTool === "rectangle" ? "#FF0000" : "#0000FF",
     };
     shapes.push(shape);
+  } else if (currentTool === "brush" || currentTool === "eraser") {
+    currentFreeform = {
+      type: "freeform",
+      points: [{ x: event.offsetX, y: event.offsetY }],
+      color: currentTool === "eraser" ? "#FFFFFF" : "#000000",
+      lineWidth: 5,
+    };
+    shapes.push(currentFreeform);
   }
 }
 
@@ -51,13 +60,15 @@ function draw(event) {
           Math.pow(event.offsetY - shape.y, 2)
       );
     }
-    redrawCanvas();
   } else if (currentTool === "brush" || currentTool === "eraser") {
+    currentFreeform.points.push({ x: event.offsetX, y: event.offsetY });
     ctx.lineTo(event.offsetX, event.offsetY);
-    ctx.strokeStyle = currentTool === "eraser" ? "#FFFFFF" : "#000000"; // White for eraser, black for brush
-    ctx.lineWidth = 5; // Adjust the brush/eraser size as needed
+    ctx.strokeStyle = currentFreeform.color;
+    ctx.lineWidth = currentFreeform.lineWidth;
     ctx.stroke();
   }
+
+  redrawCanvas();
 }
 
 function stopDrawing() {
@@ -76,6 +87,16 @@ function redrawCanvas() {
       ctx.beginPath();
       ctx.arc(shape.x, shape.y, shape.radius, 0, 2 * Math.PI);
       ctx.fill();
+      ctx.closePath();
+    } else if (shape.type === "freeform") {
+      ctx.beginPath();
+      ctx.moveTo(shape.points[0].x, shape.points[0].y);
+      shape.points.forEach((point) => {
+        ctx.lineTo(point.x, point.y);
+      });
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.lineWidth;
+      ctx.stroke();
       ctx.closePath();
     } else if (shape.type === "text") {
       ctx.fillStyle = shape.color;
