@@ -119,6 +119,20 @@ function redrawCanvas() {
   });
 }
 
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the entire canvas
+  shapes = []; // Clear the shapes array
+  uploadedImage = null; // Clear the uploaded image
+  originalImageData = null; // Clear the original image data
+
+  // Reset the file input so that the same image can be re-uploaded
+  const imageUploadInput = document.getElementById("imageUpload");
+  imageUploadInput.value = ""; // Clear the file input
+
+  // Optionally redraw the canvas to ensure it's fully cleared visually
+  redrawCanvas();
+}
+
 function getShapeAtCoordinates(x, y) {
   for (let i = shapes.length - 1; i >= 0; i--) {
     const shape = shapes[i];
@@ -246,3 +260,8 @@ document.getElementById("imageUpload").addEventListener("change", (event) => {
     reader.readAsDataURL(file);
   }
 });
+
+// Add event listener for clear canvas button
+document
+  .getElementById("clearCanvasButton")
+  .addEventListener("click", clearCanvas);
