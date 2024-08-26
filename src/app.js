@@ -1,9 +1,11 @@
 import { initializeToolbar } from "./components/toolbar.js";
 import { initializeShapeTools } from "./components/shapeTools.js";
 import { initializeTextTool } from "./components/textTool.js";
+import { initializeColorPicker } from "./components/colorPicker.js"; // Import the color picker
 import { CanvasWorkerFramework } from "./canvasWorkerFramework.js"; // Import your worker framework
 
 let currentTool = "brush"; // Default tool
+let currentColor = "#000000"; // Default color
 let uploadedImage = null; // Store uploaded image
 let originalImageData = null; // Store the original image data for reset
 
@@ -18,11 +20,16 @@ let offsetX = 0;
 let offsetY = 0;
 
 // Initialize your worker framework
-const workerFramework = new CanvasWorkerFramework("worker.js", 4);
+const workerFramework = new CanvasWorkerFramework("./worker.js", 4);
 
 function setCurrentTool(tool) {
   currentTool = tool;
   console.log(`Current tool set to: ${currentTool}`);
+}
+
+function setCurrentColor(color) {
+  currentColor = color;
+  console.log(`Current color set to: ${currentColor}`);
 }
 
 function startDrawing(event) {
@@ -38,14 +45,14 @@ function startDrawing(event) {
       width: 0,
       height: 0,
       radius: 0,
-      color: currentTool === "rectangle" ? "#FF0000" : "#0000FF",
+      color: currentColor, // Use the current color for shapes
     };
     shapes.push(shape);
   } else if (currentTool === "brush" || currentTool === "eraser") {
     currentFreeform = {
       type: "freeform",
       points: [{ x: event.offsetX, y: event.offsetY }],
-      color: currentTool === "eraser" ? "#FFFFFF" : "#000000",
+      color: currentTool === "eraser" ? "#FFFFFF" : currentColor, // Use the current color for freeform drawing
       lineWidth: 5,
     };
     shapes.push(currentFreeform);
@@ -168,7 +175,7 @@ function onMouseDown(event) {
         x: event.offsetX,
         y: event.offsetY,
         fontSize: fontSize,
-        color: "#000000", // Default text color
+        color: currentColor, // Use the current color for text
       });
       redrawCanvas();
     }
@@ -212,6 +219,7 @@ canvas.addEventListener("mouseout", onMouseUp);
 initializeToolbar(setCurrentTool); // Pass setCurrentTool to toolbar.js
 initializeShapeTools(setCurrentTool); // Pass setCurrentTool to shapeTools.js
 initializeTextTool(setCurrentTool); // Initialize the text tool
+initializeColorPicker(setCurrentColor); // Initialize the color picker
 
 // Offload filters to the worker
 function applyFilter(filterName) {

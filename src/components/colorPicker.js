@@ -1,15 +1,10 @@
-// components/colorPicker.js
+// src/components/colorPicker.js
 
-export function initializeColorPicker() {
-    const colorPicker = document.getElementById('colorPicker');
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.value = '#000000'; // Default color
+export function initializeColorPicker(setColor) {
+  const colorInput = document.getElementById("colorPickerInput");
 
-    colorInput.addEventListener('input', (event) => {
-        const selectedColor = event.target.value;
-        document.getElementById('drawingCanvas').getContext('2d').strokeStyle = selectedColor;
-    });
-
-    colorPicker.appendChild(colorInput);
+  colorInput.addEventListener("input", (event) => {
+    const selectedColor = event.target.value;
+    setColor(selectedColor);
+  });
 }
