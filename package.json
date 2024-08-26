@@ -1,0 +1,17 @@
+{
+  "name": "canvas-drawing-app",
+  "version": "1.0.0",
+  "description": "A canvas drawing app with image filters and more.",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vite": "^4.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

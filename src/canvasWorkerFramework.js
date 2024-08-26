@@ -2,7 +2,6 @@
 
 export class CanvasWorkerFramework {
   constructor(workerScriptUrl, poolSize = 4) {
-    this.workerScriptUrl = workerScriptUrl;
     this.workerPool = new Map();
     this.taskQueue = [];
     this.activeWorkers = new Set();
@@ -10,12 +9,14 @@ export class CanvasWorkerFramework {
 
     // Initialize the worker pool
     for (let i = 0; i < poolSize; i++) {
-      this.createWorker(i);
+      this.createWorker(workerScriptUrl, i);
     }
   }
 
-  createWorker(workerId) {
-    const worker = new Worker(this.workerScriptUrl);
+  createWorker(workerScriptUrl, workerId) {
+    const worker = new Worker(new URL(workerScriptUrl, import.meta.url), {
+      type: "module",
+    });
     worker.onmessage = this.handleWorkerResponse.bind(this, workerId);
     worker.onerror = this.handleWorkerError.bind(this, workerId);
     this.workerPool.set(workerId, worker);
