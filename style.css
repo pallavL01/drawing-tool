@@ -1,0 +1,13 @@
+#toolbar {
+    margin-bottom: 10px;
+}
+
+#toolbar button {
+    margin-right: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#canvasContainer {
+    border: 1px solid #ccc;
+}
