@@ -223,6 +223,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function updateSimulation() {
+    workerFramework.processCanvasTask(null, "updateSimulation").then((data) => {
+      console.log("Received particle positions from worker:", data.positions);
+      const positions = data.positions;
+      redrawParticles(positions);
+      requestAnimationFrame(updateSimulation); // Loop the simulation
+    });
+  }
+
+  function redrawParticles(positions) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (uploadedImage) {
+      ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+    }
+
+    console.log("Drawing particles:", positions.length);
+    positions.forEach(({ x, y }) => {
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, 2 * Math.PI); // Increase the particle size to 5
+      ctx.fillStyle = "red";
+      ctx.fill();
+      ctx.closePath();
+    });
+  }
+
   // Set up event listeners for drawing, erasing, etc.
   canvas.addEventListener("mousedown", onMouseDown);
   canvas.addEventListener("mousemove", onMouseMove);
@@ -289,12 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
       canvasHeight: canvas.height,
     });
 
-    requestAnimationFrame(updateSimulation);
-  }
-
-  function updateSimulation() {
-    workerFramework.processCanvasTask(null, "updateSimulation");
-    requestAnimationFrame(updateSimulation);
+    updateSimulation();
   }
 
   // Add event listener for start simulation button
@@ -306,9 +327,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("resetSimulationButton")
     .addEventListener("click", initializePhysicsSimulation);
-
-  // Add event listener for applying WASM Gaussian blur
-  document
-    .getElementById("applyBlurButton")
-    .addEventListener("click", () => applyFilter("blur-wasm"));
 });

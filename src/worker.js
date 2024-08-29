@@ -36,7 +36,7 @@ async function loadWasm() {
 loadWasm();
 
 self.onmessage = async function (event) {
-  const { task, imageData, options, payload } = event.data;
+  const { task, imageData, payload } = event.data;
 
   if (!wasmFiltersInitialized || !wasmPhysicsInitialized) {
     await loadWasm();
@@ -44,17 +44,18 @@ self.onmessage = async function (event) {
 
   switch (task) {
     case "applyFilter":
-      if (options?.filter === "blur-wasm") {
+      if (payload?.filter === "blur-wasm") {
         const filteredData = applyGaussianBlurWasm(imageData);
-        self.postMessage({ task: "applyFilter", imageData: filteredData });
+        self.postMessage({ imageData: filteredData });
       } else {
-        const filteredData = applyFilter(imageData, options.filter);
-        self.postMessage({ task: "applyFilter", imageData: filteredData });
+        const filteredData = applyFilter(imageData, payload.filter);
+        self.postMessage({ imageData: filteredData });
       }
       break;
 
     case "initPhysicsWorld":
       if (payload) {
+        console.log("Initializing physics world with:", payload);
         initializePhysicsWorld(payload.gravity, payload.timeStep);
       } else {
         console.error("initPhysicsWorld task received without a valid payload");
@@ -63,6 +64,7 @@ self.onmessage = async function (event) {
 
     case "addParticles":
       if (payload) {
+        console.log("Adding particles:", payload.numberOfParticles);
         addParticles(
           payload.numberOfParticles,
           payload.canvasWidth,
@@ -74,7 +76,9 @@ self.onmessage = async function (event) {
       break;
 
     case "updateSimulation":
-      updatePhysicsSimulation();
+      const positions = updatePhysicsSimulation();
+      console.log("Updating simulation, positions:", positions);
+      self.postMessage({ task: "updateCanvas", positions });
       break;
 
     default:
@@ -140,12 +144,14 @@ function applyGaussianBlurWasm(imageData) {
 // Physics Simulation Functions
 function initializePhysicsWorld(gravity, timeStep) {
   if (world === null) {
+    console.log("Creating new physics world");
     world = new World(gravity, timeStep);
   }
 }
 
 function addParticles(numberOfParticles, canvasWidth, canvasHeight) {
   if (world !== null) {
+    console.log(`Adding ${numberOfParticles} particles`);
     for (let i = 0; i < numberOfParticles; i++) {
       const x = Math.random() * canvasWidth;
       const y = Math.random() * canvasHeight;
@@ -154,13 +160,17 @@ function addParticles(numberOfParticles, canvasWidth, canvasHeight) {
       const mass = Math.random() * 2 + 0.5;
       world.add_particle(x, y, vx, vy, mass);
     }
+    console.log("Particles added to world.");
   }
 }
 
 function updatePhysicsSimulation() {
   if (world !== null) {
+    console.log("Updating physics world");
     world.update();
     const positions = world.get_particle_positions();
-    self.postMessage({ task: "updateCanvas", positions });
+    console.log("Particle positions:", positions);
+    return positions;
   }
+  return [];
 }
