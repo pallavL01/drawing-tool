@@ -1,20 +1,18 @@
 // components/shapeTools.js
 
 export function initializeShapeTools(setCurrentTool) {
-  const rectangleButton = document.getElementById("rectangleToolButton");
-  const circleButton = document.getElementById("circleToolButton");
+  const shapeTools = [
+    { id: "rectangleToolButton", name: "rectangle" },
+    { id: "circleToolButton", name: "circle" }
+  ];
 
-  if (rectangleButton) {
-    rectangleButton.addEventListener("click", () => {
-      setCurrentTool("rectangle");
-      console.log("Rectangle tool selected");
-    });
-  }
-
-  if (circleButton) {
-    circleButton.addEventListener("click", () => {
-      setCurrentTool("circle");
-      console.log("Circle tool selected");
-    });
+  for (const tool of shapeTools) {
+    const button = document.getElementById(tool.id);
+    if (button) {
+      button.addEventListener("click", () => {
+        setCurrentTool(tool.name);
+        console.log(`${tool.name.charAt(0).toUpperCase() + tool.name.slice(1)} tool selected`);
+      });
+    }
   }
 }

@@ -1,18 +1,16 @@
 export function initializeToolbar(setCurrentTool) {
-  const brushButton = document.getElementById("brushToolButton");
-  const eraserButton = document.getElementById("eraserToolButton");
+  const tools = [
+    { id: "brushToolButton", tool: "brush" },
+    { id: "eraserToolButton", tool: "eraser" }
+  ];
 
-  if (brushButton) {
-    brushButton.addEventListener("click", () => {
-      setCurrentTool("brush");
-      console.log("Brush tool selected");
-    });
-  }
-
-  if (eraserButton) {
-    eraserButton.addEventListener("click", () => {
-      setCurrentTool("eraser");
-      console.log("Eraser tool selected");
-    });
-  }
+  tools.forEach(({ id, tool }) => {
+    const button = document.getElementById(id);
+    if (button) {
+      button.addEventListener("click", () => {
+        setCurrentTool(tool);
+        console.log(`${tool.charAt(0).toUpperCase() + tool.slice(1)} tool selected`);
+      });
+    }
+  });
 }
