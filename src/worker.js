@@ -33,8 +33,6 @@ async function loadWasm() {
   }
 }
 
-loadWasm();
-
 self.onmessage = async function (event) {
   const { task, imageData, payload } = event.data;
 
@@ -101,7 +99,7 @@ function applyFilter(imageData, filter) {
 }
 
 function blurFilter(imageData) {
-  const radius = 3; // Example blur radius
+  const radius = 5; // Example blur radius
   const { width, height } = imageData;
   const tempCanvas = new OffscreenCanvas(width, height);
   const tempCtx = tempCanvas.getContext("2d");
@@ -130,22 +128,29 @@ function grayscaleFilter(imageData) {
     data[i] = avg; // Red
     data[i + 1] = avg; // Green
     data[i + 2] = avg; // Blue
+    data[i + 3] = 255; // Alpha
   }
   return imageData;
 }
 
 function applyGaussianBlurWasm(imageData) {
-  const width = imageData.width;
-  const height = imageData.height;
-  apply_gaussian_blur(new Uint8Array(imageData.data.buffer), width, height);
-  return imageData;
+  const { width, height, data } = imageData;
+  const uint8Array = new Uint8Array(data.buffer);
+
+  apply_gaussian_blur(uint8Array, width, height);
+
+  return new ImageData(new Uint8ClampedArray(uint8Array.buffer), width, height);
 }
 
 // Physics Simulation Functions
+function createPhysicsWorld(gravity, timeStep) {
+  console.log("Creating new physics world");
+  return new World(gravity, timeStep);
+}
+
 function initializePhysicsWorld(gravity, timeStep) {
   if (world === null) {
-    console.log("Creating new physics world");
-    world = new World(gravity, timeStep);
+    world = createPhysicsWorld(gravity, timeStep);
   }
 }
 
