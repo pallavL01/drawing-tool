@@ -4,14 +4,15 @@
 * @param {Uint8Array} image_data
 * @param {number} width
 * @param {number} height
+* @param {number} blend_factor
 */
-export function apply_gaussian_blur(image_data: Uint8Array, width: number, height: number): void;
+export function apply_gaussian_blur(image_data: Uint8Array, width: number, height: number, blend_factor: number): void;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly apply_gaussian_blur: (a: number, b: number, c: number, d: number, e: number) => void;
+  readonly apply_gaussian_blur: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
 }
 

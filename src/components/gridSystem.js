@@ -1,35 +1,38 @@
 // components/gridSystem.js
 
 export function initializeGridSystem(canvas) {
+  if (!canvas) throw new Error("Canvas element is required");
+
   const ctx = canvas.getContext("2d");
-  const gridSize = 20; // Size of each grid square
+  const GRID_SIZE = 20;
+  const GRID_COLOR = "#ddd";
+  const LINE_WIDTH = 0.5;
 
   function drawGrid() {
     const { width, height } = canvas;
 
-    ctx.strokeStyle = "#ddd"; // Light gray grid lines
-    ctx.lineWidth = 0.5; // Thin lines for the grid
-
+    ctx.save();
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = LINE_WIDTH;
     ctx.beginPath();
-    // Draw vertical lines
-    for (let x = 0; x <= width; x += gridSize) {
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
+
+    // Draw vertical and horizontal lines in single loop
+    for (let i = 0; i <= Math.max(width, height); i += GRID_SIZE) {
+      if (i <= width) {
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, height);
+      }
+      if (i <= height) {
+        ctx.moveTo(0, i);
+        ctx.lineTo(width, i);
+      }
     }
 
-    // Draw horizontal lines
-    for (let y = 0; y <= height; y += gridSize) {
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-    }
     ctx.stroke();
+    ctx.restore();
   }
 
-  // Initially draw the grid
   drawGrid();
 
-  return {
-    drawGrid, // Expose the drawGrid function
-    refreshGrid: drawGrid, // Alias for refreshing the grid
-  };
+  return { drawGrid };
 }

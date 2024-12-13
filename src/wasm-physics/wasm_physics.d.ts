@@ -1,57 +1,22 @@
 /* tslint:disable */
 /* eslint-disable */
-/**
-*/
 export class Particle {
+  private constructor();
   free(): void;
-/**
-* @param {number} x
-* @param {number} y
-* @param {number} vx
-* @param {number} vy
-* @param {number} mass
-* @returns {Particle}
-*/
-  static new(x: number, y: number, vx: number, vy: number, mass: number): Particle;
-/**
-* @param {number} gravity
-* @param {number} time_step
-*/
+  static new(x: number, y: number, vx: number, vy: number, mass: number, bounce: number): Particle;
   update(gravity: number, time_step: number): void;
-/**
-* @returns {number}
-*/
-  get_x(): number;
-/**
-* @returns {number}
-*/
-  get_y(): number;
 }
-/**
-*/
 export class World {
+  private constructor();
   free(): void;
-/**
-* @param {number} gravity
-* @param {number} time_step
-* @returns {World}
-*/
   static new(gravity: number, time_step: number): World;
-/**
-* @param {number} x
-* @param {number} y
-* @param {number} vx
-* @param {number} vy
-* @param {number} mass
-*/
-  add_particle(x: number, y: number, vx: number, vy: number, mass: number): void;
-/**
-*/
+  add_particle(x: number, y: number, vx: number, vy: number, mass: number, bounce: number): void;
   update(): void;
-/**
-* @returns {Float32Array}
-*/
   get_particle_positions(): Float32Array;
+  set_gravity(gravity: number): void;
+  set_wind(wind: number): void;
+  add_turbulence(turbulence: number): void;
+  add_force_field(x: number, y: number, strength: number, radius: number): void;
 }
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
@@ -59,15 +24,17 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly __wbg_particle_free: (a: number, b: number) => void;
-  readonly particle_new: (a: number, b: number, c: number, d: number, e: number) => number;
+  readonly particle_new: (a: number, b: number, c: number, d: number, e: number, f: number) => number;
   readonly particle_update: (a: number, b: number, c: number) => void;
-  readonly particle_get_x: (a: number) => number;
-  readonly particle_get_y: (a: number) => number;
   readonly __wbg_world_free: (a: number, b: number) => void;
   readonly world_new: (a: number, b: number) => number;
-  readonly world_add_particle: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+  readonly world_add_particle: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
   readonly world_update: (a: number) => void;
   readonly world_get_particle_positions: (a: number, b: number) => void;
+  readonly world_set_gravity: (a: number, b: number) => void;
+  readonly world_set_wind: (a: number, b: number) => void;
+  readonly world_add_turbulence: (a: number, b: number) => void;
+  readonly world_add_force_field: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }

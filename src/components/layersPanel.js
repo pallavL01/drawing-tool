@@ -1,71 +1,82 @@
 // components/layersPanel.js
 
 export function initializeLayersPanel() {
-  const canvasContainer = document.getElementById("canvasContainer");
-  const layersPanel = document.getElementById("layersPanel");
+  const elements = {
+    container: document.getElementById("canvasContainer"),
+    panel: document.getElementById("layersPanel"),
+  };
 
-  const layers = []; // Array to hold canvas layers
-  let currentLayerIndex = 0;
+  const state = {
+    layers: [],
+    currentIndex: 0,
+  };
 
-  // Function to create a new layer
-  function createLayer() {
-    const layer = document.createElement("canvas");
-    layer.width = 800;
-    layer.height = 800;
-    layer.style.position = "absolute";
-    canvasContainer.appendChild(layer);
-    layers.push(layer);
-    currentLayerIndex = layers.length - 1;
-    updateLayersUI();
-  }
+  const CANVAS_DIMENSIONS = { width: 800, height: 800 };
 
-  // Function to update the layers UI
-  function updateLayersUI() {
-    layersPanel.innerHTML = "";
-    layers.forEach((layer, index) => {
-      const layerItem = document.createElement("div");
-      layerItem.textContent = `Layer ${index + 1}`;
-      layerItem.style.cursor = "pointer";
-      layerItem.style.padding = "5px";
-      layerItem.style.border =
-        index === currentLayerIndex ? "2px solid #000" : "1px solid #ccc";
-      layerItem.addEventListener("click", () => setActiveLayer(index));
-      layersPanel.appendChild(layerItem);
+  const createCanvas = () => {
+    const canvas = document.createElement("canvas");
+    Object.assign(canvas, {
+      ...CANVAS_DIMENSIONS,
+      style: { position: "absolute" },
     });
-  }
+    return canvas;
+  };
 
-  // Function to set the active layer
-  function setActiveLayer(index) {
-    currentLayerIndex = index;
+  const createLayer = () => {
+    const canvas = createCanvas();
+    elements.container.appendChild(canvas);
+    state.layers.push(canvas);
+    state.currentIndex = state.layers.length - 1;
     updateLayersUI();
-  }
+  };
 
-  // Function to delete the current layer
-  function deleteLayer() {
-    if (layers.length > 1) {
-      layers[currentLayerIndex].remove();
-      layers.splice(currentLayerIndex, 1);
-      currentLayerIndex = Math.max(0, currentLayerIndex - 1);
-      updateLayersUI();
-    } else {
+  const updateLayersUI = () => {
+    elements.panel.innerHTML = "";
+    state.layers.forEach((_, index) => {
+      const layerItem = document.createElement("div");
+      Object.assign(layerItem, {
+        textContent: `Layer ${index + 1}`,
+        style: {
+          cursor: "pointer",
+          padding: "5px",
+          border:
+            index === state.currentIndex ? "2px solid #000" : "1px solid #ccc",
+        },
+        onclick: () => setActiveLayer(index),
+      });
+      elements.panel.appendChild(layerItem);
+    });
+  };
+
+  const setActiveLayer = (index) => {
+    state.currentIndex = index;
+    updateLayersUI();
+  };
+
+  const deleteLayer = () => {
+    if (state.layers.length <= 1) {
       alert("At least one layer must remain.");
-    }
-  }
-
-  // Wait for the DOM to fully load before adding event listeners
-  document.addEventListener("DOMContentLoaded", () => {
-    const addLayerButton = document.getElementById("addLayerButton");
-    const deleteLayerButton = document.getElementById("deleteLayerButton");
-
-    if (addLayerButton) {
-      addLayerButton.addEventListener("click", createLayer);
+      return;
     }
 
-    if (deleteLayerButton) {
-      deleteLayerButton.addEventListener("click", deleteLayer);
-    }
+    state.layers[state.currentIndex].remove();
+    state.layers.splice(state.currentIndex, 1);
+    state.currentIndex = Math.max(0, state.currentIndex - 1);
+    updateLayersUI();
+  };
 
-    // Initialize with one layer
-    createLayer();
-  });
+  const initEventListeners = () => {
+    ["addLayerButton", "deleteLayerButton"].forEach((id) => {
+      const button = document.getElementById(id);
+      if (button) {
+        button.addEventListener(
+          "click",
+          id === "addLayerButton" ? createLayer : deleteLayer
+        );
+      }
+    });
+    createLayer(); // Initialize with one layer
+  };
+
+  document.addEventListener("DOMContentLoaded", initEventListeners);
 }

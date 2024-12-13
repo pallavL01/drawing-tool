@@ -55,11 +55,12 @@ function addHeapObject(obj) {
 * @param {Uint8Array} image_data
 * @param {number} width
 * @param {number} height
+* @param {number} blend_factor
 */
-export function apply_gaussian_blur(image_data, width, height) {
+export function apply_gaussian_blur(image_data, width, height, blend_factor) {
     var ptr0 = passArray8ToWasm0(image_data, wasm.__wbindgen_malloc);
     var len0 = WASM_VECTOR_LEN;
-    wasm.apply_gaussian_blur(ptr0, len0, addHeapObject(image_data), width, height);
+    wasm.apply_gaussian_blur(ptr0, len0, addHeapObject(image_data), width, height, blend_factor);
 }
 
 async function __wbg_load(module, imports) {

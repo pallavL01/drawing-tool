@@ -44,8 +44,7 @@ function getArrayF32FromWasm0(ptr, len) {
 const ParticleFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_particle_free(ptr >>> 0, 1));
-/**
-*/
+
 export class Particle {
 
     static __wrap(ptr) {
@@ -68,45 +67,31 @@ export class Particle {
         wasm.__wbg_particle_free(ptr, 0);
     }
     /**
-    * @param {number} x
-    * @param {number} y
-    * @param {number} vx
-    * @param {number} vy
-    * @param {number} mass
-    * @returns {Particle}
-    */
-    static new(x, y, vx, vy, mass) {
-        const ret = wasm.particle_new(x, y, vx, vy, mass);
+     * @param {number} x
+     * @param {number} y
+     * @param {number} vx
+     * @param {number} vy
+     * @param {number} mass
+     * @param {number} bounce
+     * @returns {Particle}
+     */
+    static new(x, y, vx, vy, mass, bounce) {
+        const ret = wasm.particle_new(x, y, vx, vy, mass, bounce);
         return Particle.__wrap(ret);
     }
     /**
-    * @param {number} gravity
-    * @param {number} time_step
-    */
+     * @param {number} gravity
+     * @param {number} time_step
+     */
     update(gravity, time_step) {
         wasm.particle_update(this.__wbg_ptr, gravity, time_step);
-    }
-    /**
-    * @returns {number}
-    */
-    get_x() {
-        const ret = wasm.particle_get_x(this.__wbg_ptr);
-        return ret;
-    }
-    /**
-    * @returns {number}
-    */
-    get_y() {
-        const ret = wasm.particle_get_y(this.__wbg_ptr);
-        return ret;
     }
 }
 
 const WorldFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_world_free(ptr >>> 0, 1));
-/**
-*/
+
 export class World {
 
     static __wrap(ptr) {
@@ -129,32 +114,31 @@ export class World {
         wasm.__wbg_world_free(ptr, 0);
     }
     /**
-    * @param {number} gravity
-    * @param {number} time_step
-    * @returns {World}
-    */
+     * @param {number} gravity
+     * @param {number} time_step
+     * @returns {World}
+     */
     static new(gravity, time_step) {
         const ret = wasm.world_new(gravity, time_step);
         return World.__wrap(ret);
     }
     /**
-    * @param {number} x
-    * @param {number} y
-    * @param {number} vx
-    * @param {number} vy
-    * @param {number} mass
-    */
-    add_particle(x, y, vx, vy, mass) {
-        wasm.world_add_particle(this.__wbg_ptr, x, y, vx, vy, mass);
+     * @param {number} x
+     * @param {number} y
+     * @param {number} vx
+     * @param {number} vy
+     * @param {number} mass
+     * @param {number} bounce
+     */
+    add_particle(x, y, vx, vy, mass, bounce) {
+        wasm.world_add_particle(this.__wbg_ptr, x, y, vx, vy, mass, bounce);
     }
-    /**
-    */
     update() {
         wasm.world_update(this.__wbg_ptr);
     }
     /**
-    * @returns {Float32Array}
-    */
+     * @returns {Float32Array}
+     */
     get_particle_positions() {
         try {
             const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
@@ -168,6 +152,33 @@ export class World {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }
     }
+    /**
+     * @param {number} gravity
+     */
+    set_gravity(gravity) {
+        wasm.world_set_gravity(this.__wbg_ptr, gravity);
+    }
+    /**
+     * @param {number} wind
+     */
+    set_wind(wind) {
+        wasm.world_set_wind(this.__wbg_ptr, wind);
+    }
+    /**
+     * @param {number} turbulence
+     */
+    add_turbulence(turbulence) {
+        wasm.world_add_turbulence(this.__wbg_ptr, turbulence);
+    }
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {number} strength
+     * @param {number} radius
+     */
+    add_force_field(x, y, strength, radius) {
+        wasm.world_add_force_field(this.__wbg_ptr, x, y, strength, radius);
+    }
 }
 
 async function __wbg_load(module, imports) {
@@ -178,7 +189,7 @@ async function __wbg_load(module, imports) {
 
             } catch (e) {
                 if (module.headers.get('Content-Type') != 'application/wasm') {
-                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
+                    console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", e);
 
                 } else {
                     throw e;
@@ -204,6 +215,10 @@ async function __wbg_load(module, imports) {
 function __wbg_get_imports() {
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbg_random_a435d21390634bdf = function() {
+        const ret = Math.random();
+        return ret;
+    };
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
     };
@@ -231,10 +246,13 @@ function initSync(module) {
     if (wasm !== undefined) return wasm;
 
 
-    if (typeof module !== 'undefined' && Object.getPrototypeOf(module) === Object.prototype)
-    ({module} = module)
-    else
-    console.warn('using deprecated parameters for `initSync()`; pass a single object instead')
+    if (typeof module !== 'undefined') {
+        if (Object.getPrototypeOf(module) === Object.prototype) {
+            ({module} = module)
+        } else {
+            console.warn('using deprecated parameters for `initSync()`; pass a single object instead')
+        }
+    }
 
     const imports = __wbg_get_imports();
 
@@ -253,10 +271,13 @@ async function __wbg_init(module_or_path) {
     if (wasm !== undefined) return wasm;
 
 
-    if (typeof module_or_path !== 'undefined' && Object.getPrototypeOf(module_or_path) === Object.prototype)
-    ({module_or_path} = module_or_path)
-    else
-    console.warn('using deprecated parameters for the initialization function; pass a single object instead')
+    if (typeof module_or_path !== 'undefined') {
+        if (Object.getPrototypeOf(module_or_path) === Object.prototype) {
+            ({module_or_path} = module_or_path)
+        } else {
+            console.warn('using deprecated parameters for the initialization function; pass a single object instead')
+        }
+    }
 
     if (typeof module_or_path === 'undefined') {
         module_or_path = new URL('wasm_physics_bg.wasm', import.meta.url);
