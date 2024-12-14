@@ -25,6 +25,9 @@
                 <option value="" selected disabled>Apply Filter</option>
                 <option value="reset">Reset Filter</option>
                 <option value="blur-wasm">Gaussian Blur (WASM)</option>
+                <option value="edge-detection">Edge Detection</option>
+                <option value="pixelate">Pixelate</option>
+                <option value="color-manipulation">Color Manipulation</option>
                 <option value="blur">Gaussian Blur (JS)</option>
                 <option value="invert">Invert</option>
                 <option value="grayscale">Grayscale</option>
@@ -58,6 +61,48 @@
         </div>
         <button id="addEmitterButton">Add Emitter</button>
         <button id="toggleAttractorButton">Toggle Attractor</button>
+    </div>
+
+    <div class="advanced-controls">
+        <div class="effects-panel">
+            <h3>Effects</h3>
+            <button id="edgeDetectBtn">Edge Detection</button>
+            <button id="pixelateBtn">Pixelate</button>
+            <div class="slider-container">
+                <label>Noise Amount</label>
+                <input type="range" id="noiseAmount" min="0" max="1" step="0.1">
+            </div>
+        </div>
+        
+        <div class="simulation-panel">
+            <h3>Simulations</h3>
+            <button id="fluidSimBtn">Fluid Simulation</button>
+            <button id="clothSimBtn">Cloth Simulation</button>
+        </div>
+    </div>
+
+    <!-- Add controls for color manipulation -->
+    <div class="filter-controls" id="colorManipulationControls" style="display: none;">
+        <div class="slider-container">
+            <label for="hueControl">Hue:</label>
+            <input type="range" id="hueControl" min="0" max="1" step="0.1" value="0">
+        </div>
+        <div class="slider-container">
+            <label for="saturationControl">Saturation:</label>
+            <input type="range" id="saturationControl" min="0" max="2" step="0.1" value="1">
+        </div>
+        <div class="slider-container">
+            <label for="brightnessControl">Brightness:</label>
+            <input type="range" id="brightnessControl" min="0" max="2" step="0.1" value="1">
+        </div>
+    </div>
+
+    <!-- Add control for pixelate -->
+    <div class="filter-controls" id="pixelateControls" style="display: none;">
+        <div class="slider-container">
+            <label for="pixelSizeControl">Pixel Size:</label>
+            <input type="range" id="pixelSizeControl" min="2" max="32" step="2" value="8">
+        </div>
     </div>
 
     <script type="module" src="/src/app.js"></script>

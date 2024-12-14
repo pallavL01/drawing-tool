@@ -9,10 +9,10 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "three": "^0.167.1"
+    "three": "^0.171.0"
   },
   "devDependencies": {
-    "vite": "^4.0.0"
+    "vite": "^6.0.3"
   },
   "author": "Your Name",
   "license": "MIT"

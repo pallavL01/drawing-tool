@@ -41,6 +41,85 @@ function getArrayF32FromWasm0(ptr, len) {
     return getFloat32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
 }
 
+const ClothSimulationFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_clothsimulation_free(ptr >>> 0, 1));
+
+export class ClothSimulation {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(ClothSimulation.prototype);
+        obj.__wbg_ptr = ptr;
+        ClothSimulationFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        ClothSimulationFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_clothsimulation_free(ptr, 0);
+    }
+    /**
+     * @param {number} width
+     * @param {number} height
+     * @returns {ClothSimulation}
+     */
+    static new(width, height) {
+        const ret = wasm.clothsimulation_new(width, height);
+        return ClothSimulation.__wrap(ret);
+    }
+    /**
+     * @param {number} gravity
+     */
+    update(gravity) {
+        wasm.clothsimulation_update(this.__wbg_ptr, gravity);
+    }
+}
+
+const FluidSimulationFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_fluidsimulation_free(ptr >>> 0, 1));
+
+export class FluidSimulation {
+
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(FluidSimulation.prototype);
+        obj.__wbg_ptr = ptr;
+        FluidSimulationFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        FluidSimulationFinalization.unregister(this);
+        return ptr;
+    }
+
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_fluidsimulation_free(ptr, 0);
+    }
+    /**
+     * @returns {FluidSimulation}
+     */
+    static new() {
+        const ret = wasm.fluidsimulation_new();
+        return FluidSimulation.__wrap(ret);
+    }
+    update() {
+        wasm.fluidsimulation_update(this.__wbg_ptr);
+    }
+}
+
 const ParticleFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_particle_free(ptr >>> 0, 1));
@@ -121,6 +200,15 @@ export class World {
     static new(gravity, time_step) {
         const ret = wasm.world_new(gravity, time_step);
         return World.__wrap(ret);
+    }
+    /**
+     * @param {number} left
+     * @param {number} top
+     * @param {number} right
+     * @param {number} bottom
+     */
+    set_boundaries(left, top, right, bottom) {
+        wasm.world_set_boundaries(this.__wbg_ptr, left, top, right, bottom);
     }
     /**
      * @param {number} x

@@ -1,5 +1,17 @@
 /* tslint:disable */
 /* eslint-disable */
+export class ClothSimulation {
+  private constructor();
+  free(): void;
+  static new(width: number, height: number): ClothSimulation;
+  update(gravity: number): void;
+}
+export class FluidSimulation {
+  private constructor();
+  free(): void;
+  static new(): FluidSimulation;
+  update(): void;
+}
 export class Particle {
   private constructor();
   free(): void;
@@ -10,6 +22,7 @@ export class World {
   private constructor();
   free(): void;
   static new(gravity: number, time_step: number): World;
+  set_boundaries(left: number, top: number, right: number, bottom: number): void;
   add_particle(x: number, y: number, vx: number, vy: number, mass: number, bounce: number): void;
   update(): void;
   get_particle_positions(): Float32Array;
@@ -28,6 +41,7 @@ export interface InitOutput {
   readonly particle_update: (a: number, b: number, c: number) => void;
   readonly __wbg_world_free: (a: number, b: number) => void;
   readonly world_new: (a: number, b: number) => number;
+  readonly world_set_boundaries: (a: number, b: number, c: number, d: number, e: number) => void;
   readonly world_add_particle: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
   readonly world_update: (a: number) => void;
   readonly world_get_particle_positions: (a: number, b: number) => void;
@@ -35,6 +49,12 @@ export interface InitOutput {
   readonly world_set_wind: (a: number, b: number) => void;
   readonly world_add_turbulence: (a: number, b: number) => void;
   readonly world_add_force_field: (a: number, b: number, c: number, d: number, e: number) => void;
+  readonly __wbg_fluidsimulation_free: (a: number, b: number) => void;
+  readonly fluidsimulation_new: () => number;
+  readonly fluidsimulation_update: (a: number) => void;
+  readonly __wbg_clothsimulation_free: (a: number, b: number) => void;
+  readonly clothsimulation_new: (a: number, b: number) => number;
+  readonly clothsimulation_update: (a: number, b: number) => void;
   readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
   readonly __wbindgen_free: (a: number, b: number, c: number) => void;
 }
